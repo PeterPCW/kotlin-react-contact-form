@@ -1,0 +1,11 @@
+.App {
+  text-align: center;
+}
+
+.title {
+  font-size: 6rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: Verdana, sans-serif;
+}
