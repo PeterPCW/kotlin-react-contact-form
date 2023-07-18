@@ -1,32 +1,42 @@
-import org.springframework.mail.javamail.JavaMailSender
+package form.email.kotlin
+
+import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.mail.javamail.MimeMessageHelper
-import jakarta.mail.MessagingException
 import jakarta.mail.internet.MimeMessage
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Bean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
-import org.springframework.mail.javamail.JavaMailSenderImpl
 import form.email.kotlin.ContactFormData
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
-@Configuration
-class KotlinFormEmailConfig {
+@RestController
+@RequestMapping("/")
+class Controller {
     @Autowired
     private lateinit var environment: Environment
 
-    @Bean
-    fun contactFormFunction(mailSender: JavaMailSender): (ContactFormData) -> String {
-        return { formData ->
-            try {
-                sendEmail(formData, mailSender)
-                "Email sent successfully"
-            } catch (e: Exception) {
-                "Error sending email: ${e.message}"
-            }
+    @PostMapping("contact")
+    fun sendContactForm(@RequestBody formData: ContactFormData): String {
+        return try {
+            sendEmail(formData)
+            "Email sent successfully"
+        } catch (e: Exception) {
+            "Error sending email: ${e.message}"
         }
     }
 
-    private fun sendEmail(formData: ContactFormData, mailSender: JavaMailSender) {
+    @GetMapping("contact")
+    fun home(): String {
+        return "Running!"
+    }
+
+    private fun sendEmail(formData: ContactFormData) {
+        val mailSender = createMailSender()
+
         val message: MimeMessage = mailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true)
 
@@ -53,14 +63,20 @@ class KotlinFormEmailConfig {
         mailSender.send(message)
     }
 
-    @Bean
-    fun mailSender(): JavaMailSender {
+    private fun createMailSender(): JavaMailSenderImpl {
         val mailSender = JavaMailSenderImpl()
         mailSender.host = environment.getProperty("email.host")
         mailSender.port = environment.getProperty("email.port")?.toInt() ?: 0
         mailSender.username = environment.getProperty("email.username")
         mailSender.password = environment.getProperty("email.password")
+        mailSender.javaMailProperties["mail.smtp.starttls.enable"] = "true"
+        mailSender.javaMailProperties["mail.smtp.starttls.required"] = "true"
         // Configure any additional properties if required
         return mailSender
+    }
+
+    @Bean
+    fun javaMailSender(environment: Environment): JavaMailSenderImpl {
+        return createMailSender()
     }
 }

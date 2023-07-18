@@ -2,15 +2,20 @@ package form.email.kotlin
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.context.annotation.Bean
-import java.util.function.Function
-import org.springframework.cloud.function.context.FunctionCatalog
-import kotlin.jvm.internal.Reflection
-import kotlin.jvm.javaClass
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RestController
 
 @SpringBootApplication
-open class KotlinFormEmail 
+class KotlinFormEmail
 
 fun main(args: Array<String>) {
-	runApplication<KotlinFormEmail>(*args)
+    runApplication<KotlinFormEmail>(*args)
+}
+
+@RestController
+class HomeController {
+    @GetMapping("/")
+    fun home(): String {
+        return "Running!"
+    }
 }
